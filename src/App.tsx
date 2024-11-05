@@ -67,42 +67,41 @@ import SignUp from './auth/SignUp'
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const savedAuthState = localStorage.getItem('isAuthenticated');
-    console.log(savedAuthState)
-    return savedAuthState ? JSON.parse(savedAuthState) : false;
+    const savedAuthState = localStorage.getItem('access_token');
+    // const accessToken = localStorage.getItem('accessToken');
+    // console.log(savedAuthState, accessToken);
+    return  savedAuthState!=null ? true : false;
   });
 
   React.useEffect(() => {
-    console.log(isAuthenticated)
+    console.log(isAuthenticated);
   }, [isAuthenticated]);
 
   return (
     <Router>
-     
-        {isAuthenticated ? (
-           <div className="flex h-screen">
-            <Sidebar />
-            <Separator orientation="vertical" />
-            <ScrollArea className="flex-1">
-              <Routes>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/upload" element={<UploadAPIs />} />
-                <Route path="/configure" element={<ConfigureTests />} />
-                <Route path="/results" element={<TestResults />} />
-                <Route path="/settings" element={<Settings1 />} />
-              </Routes>
-            </ScrollArea>
-            </div>
-        ) : (
-          <div className="">
+      {isAuthenticated ? (
+        <div className="flex h-screen">
+          <Sidebar />
+          <Separator orientation="vertical" />
+          <ScrollArea className="flex-1">
+            <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/upload" element={<UploadAPIs />} />
+              <Route path="/configure" element={<ConfigureTests />} />
+              <Route path="/results" element={<TestResults />} />
+              <Route path="/settings" element={<Settings1 />} />
+            </Routes>
+          </ScrollArea>
+        </div>
+      ) : (
+        <div className="">
           <Routes>
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/" element={<SignUp  />} />
+            <Route path="/" element={<SignUp />} />
           </Routes>
-          </div>
-        )}
-     
+        </div>
+      )}
     </Router>
-  )
+  );
 }
