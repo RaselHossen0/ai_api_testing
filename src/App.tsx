@@ -104,11 +104,11 @@ import SignUp from './auth/SignUp'
 import { urls } from './api/urls'
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+  const [isAuthenticated] = useState(() => {
     const savedAuthState = localStorage.getItem('access_token');
     console.log(savedAuthState);
     try {
-      const response = fetch(urls.getCurrentUser, {
+      fetch(urls.getCurrentUser, {
         method: 'GET',
         headers: {
           // 'Content-Type': 'application/json',

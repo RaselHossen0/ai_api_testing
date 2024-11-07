@@ -15,9 +15,9 @@ export default function ConfigureTests() {
   const [testHeaders, setTestHeaders] = useState('');
   const [testPayload, setTestPayload] = useState('');
   const [apiResponse, setApiResponse] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleRunTest = async (e) => {
+  const handleRunTest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -47,7 +47,11 @@ export default function ConfigureTests() {
         throw new Error(errorData.detail || 'An unexpected error occurred.');
       }
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     }
   };
 
