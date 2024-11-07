@@ -14,7 +14,7 @@ export default function SignIn() {
   const [error, setError] = useState('')
 
 
-  const getUserInfo = async (token: any) => {
+  const getUserInfo = async (token: string) => {
     try {
       const response = await fetch(urls.getCurrentUser, {
         method: 'GET',
