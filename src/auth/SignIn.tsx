@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
-
+import { urls} from "../api/urls"
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +24,7 @@ export default function SignIn() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/auth/token', {
+      const response = await fetch(urls.loginUser, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

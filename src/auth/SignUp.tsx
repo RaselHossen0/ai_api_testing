@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { urls} from "../api/urls"
+
 
 export default function SignUp() {
   const [name, setName] = useState('')
@@ -36,7 +38,8 @@ export default function SignUp() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/users/create', {
+        console.log('urls.baseUrl', urls)
+      const response = await fetch(`${urls.createUser}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +59,7 @@ export default function SignUp() {
 
       const data = await response.json()
       console.log('Account created:', data)
-      alert('Account created successfully! Please check your email to verify your account.')
+      alert('Account created successfully!Your account id is '+data.id)
     } catch (error) {
       console.error('Failed to create account:', error)
       // setError(error.message)

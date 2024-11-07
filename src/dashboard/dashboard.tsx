@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview")
+  console.log('activeTab', activeTab);
 
   return (
     <div className="container mx-auto p-4">
