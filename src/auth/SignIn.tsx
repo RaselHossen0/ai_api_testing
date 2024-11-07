@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { urls} from "../api/urls"
+
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,6 +14,27 @@ export default function SignIn() {
   const [error, setError] = useState('')
 
 
+  const getUserInfo = async (token: any) => {
+    try {
+      const response = await fetch(urls.getCurrentUser, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const userData = await response.json()
+        localStorage.setItem('user', JSON.stringify(userData))
+        
+      } else {
+        console.error('Failed to fetch user info')
+      }
+    } catch (err) {
+      console.error('Error fetching user info:', err)
+    }
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -35,8 +57,11 @@ export default function SignIn() {
 
       if (response.ok) {
         const data = await response.json()
-        localStorage.setItem('access_token', data.access_token)
+        const token = data.access_token
+        localStorage.setItem('access_token', token)
         // localStorage.setItem('is_authenticated', 'true')
+          // Fetch user info with the token
+        await getUserInfo(token)
         location.href = '/dashboard'
       } else {
         const errorData = await response.json()
@@ -114,3 +139,4 @@ export default function SignIn() {
     </div>
   )
 }
+
