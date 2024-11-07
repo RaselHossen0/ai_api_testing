@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { urls} from "../api/urls"
+
 
 export default function SignUp() {
   const [name, setName] = useState('')
@@ -15,7 +17,7 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -35,10 +37,33 @@ export default function SignUp() {
       return
     }
 
-    // Here you would typically call your registration service
-    console.log('Signing up with:', { name, email, password })
-    // For demo purposes, let's simulate a success message
-    alert('Account created successfully! Please check your email to verify your account.')
+    try {
+        console.log('urls.baseUrl', urls)
+      const response = await fetch(`${urls.createUser}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          disabled: false
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create account')
+      }
+
+      const data = await response.json()
+      console.log('Account created:', data)
+      alert('Account created successfully!Your account id is '+data.id)
+    } catch (error) {
+      console.error('Failed to create account:', error)
+      // setError(error.message)
+    }
   }
 
   return (

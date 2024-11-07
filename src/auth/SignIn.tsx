@@ -5,31 +5,47 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
-
+import { urls} from "../api/urls"
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    const isAuthenticated = 'isAuthenticated'
-    localStorage.setItem(isAuthenticated, JSON.stringify(true))
-    location.href = '/dashboard'
 
     // Basic form validation
-    // if (!email || !password) {
-    //   setError('Please fill in all fields')
-    //   return
-    // }
+    if (!email || !password) {
+      setError('Please fill in all fields')
+      return
+    }
 
-    // Here you would typically call your authentication service
-    console.log('Signing in with:', { email, password })
-    
-    // For demo purposes, let's simulate an error
-    setError('Invalid email or password')
+    try {
+      const response = await fetch(urls.loginUser, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        localStorage.setItem('access_token', data.access_token)
+        // localStorage.setItem('is_authenticated', 'true')
+        location.href = '/dashboard'
+      } else {
+        const errorData = await response.json()
+        setError(errorData.detail[0].msg || 'Invalid email or password')
+      }
+    } catch (err) {
+      console.error(err)
+      setError('An error occurred. Please try again.')
+    }
   }
 
   return (
