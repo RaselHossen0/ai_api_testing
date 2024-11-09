@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Upload, FileText } from "lucide-react"
 import { urls } from "../api/urls"
-import { url } from 'inspector'
+
 
 export default function UploadAPIs() {
   const [activeTab, setActiveTab] = useState("individual")
@@ -15,16 +15,28 @@ export default function UploadAPIs() {
   const [apiUrl, setApiUrl] = useState("")
   const [httpMethod, setHttpMethod] = useState("GET")
   const [loading, setLoading] = useState(false)
-  const [responseMessage, setResponseMessage] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [responseMessage, setResponseMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string>("")
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   console.log(user);
 
-  const handleSubmit = async (e) => {
+  interface User {
+    id: string;
+  }
+
+  interface ApiResponse {
+    message: string;
+  }
+
+  interface ApiError {
+    detail: { msg: string }[];
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setResponseMessage(null)
-    setErrorMessage(null)
+    setErrorMessage("")
 
     try {
       const response = await fetch(urls.uploadIndividualAPI, {
@@ -36,15 +48,15 @@ export default function UploadAPIs() {
           api_name: apiName,
           api_url: apiUrl,
           http_method: httpMethod,
-          user_id: user.id,
+          user_id: (user as User).id,
         }),
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data: ApiResponse = await response.json()
         setResponseMessage(data.message)
       } else if (response.status === 422) {
-        const errorData = await response.json()
+        const errorData: ApiError = await response.json()
         setErrorMessage(errorData.detail[0].msg || "Validation error")
       } else {
         setErrorMessage("An unexpected error occurred.")

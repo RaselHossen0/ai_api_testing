@@ -7,7 +7,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Settings, Play } from "lucide-react";
 import { urls } from '@/api/urls';
-import { beautify } from 'json-beautify';
+// import { beautify } from 'json-beautify';
+
+interface Api {
+  id: string;
+  api_url: string;
+  api_name: string;
+  http_method: string;
+}
+
+interface TestResult {
+  description: string;
+  expected_status: number;
+  status_code: number;
+  success: boolean;
+  response_data: any;
+  test_case: {
+    description: string;
+    expected_status: number;
+    test_type: string;
+  };
+  headers: Record<string, string>;
+}
 
 export default function ConfigureTests() {
   const [useAI, setUseAI] = useState(false);
@@ -16,22 +37,16 @@ export default function ConfigureTests() {
   const [testParams, setTestParams] = useState('');
   const [testHeaders, setTestHeaders] = useState('');
   const [testPayload, setTestPayload] = useState('');
-  const [apiResponse, setApiResponse] = useState(null);
+
   const [error, setError] = useState<string | null>(null);
-  const [apiList, setApiList] = useState([]);
+
+  const [apiList, setApiList] = useState<Api[]>([]);
   const [selectedApi, setSelectedApi] = useState('');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState([]);
+  
+  const [results, setResults] = useState<TestResult[]>([]);
 
-  const handleFormatJSON = () => {
-    try {
-      const formattedJSON = beautify(JSON.parse(testPayload), null, 2, 80);
-      setTestPayload(formattedJSON);
-    } catch (err) {
-      setError("Invalid JSON format.");
-    }
-  };
 
   // Fetch APIs on component mount
   useEffect(() => {
@@ -86,6 +101,11 @@ export default function ConfigureTests() {
           status_code: response.status,
           success: response.status === 200, // Adjust based on your success criteria
           response_data: responseData,
+          test_case: {
+            description: testDescription,
+            expected_status: 200, // Add expected status dynamically as per requirement
+            test_type: 'Manual', // Adjust based on your test type
+          },
           headers: headers,
         }
       ]);
@@ -138,7 +158,7 @@ export default function ConfigureTests() {
             </select>
 
             <TextareaField id="test-payload" label="Payload" value={testPayload} setValue={setTestPayload} placeholder="Enter request payload (JSON format)" />
-            <Button type="button" onClick={handleFormatJSON} variant="secondary">Format JSON</Button>
+            {/* <Button type="button" onClick={handleFormatJSON} variant="secondary">Format JSON</Button> */}
 
             <div className="flex items-center space-x-2">
               <Switch id="use-ai" checked={useAI} onCheckedChange={setUseAI} />
@@ -169,7 +189,7 @@ export default function ConfigureTests() {
   );
 }
 
-function InputField({ id, label, value, setValue, placeholder }) {
+function InputField({ id, label, value, setValue, placeholder }: { id: string; label: string; value: string; setValue: React.Dispatch<React.SetStateAction<string>>; placeholder: string }) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -183,7 +203,7 @@ function InputField({ id, label, value, setValue, placeholder }) {
   );
 }
 
-function TextareaField({ id, label, value, setValue, placeholder }) {
+function TextareaField({ id, label, value, setValue, placeholder }: { id: string; label: string; value: string; setValue: React.Dispatch<React.SetStateAction<string>>; placeholder: string }) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -196,18 +216,39 @@ function TextareaField({ id, label, value, setValue, placeholder }) {
     </div>
   );
 }
-
-function ResultDisplay({ result }) {
+function ResultDisplay({ result }: { result: TestResult }) {
   return (
-    <div style={{ color: result.success ? 'green' : 'red' }}>
-      <h3>{result.description}</h3>
+    <div className={`p-4 mb-4 rounded ${result.success ? 'bg-green-100' : 'bg-red-100'}`}>
+      <h3 className="font-semibold text-lg">{result.description || 'Test Results'}</h3>
       <p>Expected Status: {result.expected_status}</p>
       <p>Actual Status: {result.status_code}</p>
       <p>Success: {result.success ? '✅' : '❌'}</p>
-      <h4>Response Data</h4>
-      <pre>{JSON.stringify(result.response_data, null, 2)}</pre>
-      <h4>Headers</h4>
-      <pre>{JSON.stringify(result.headers, null, 2)}</pre>
+
+      <h4 className="mt-4 font-semibold text-blue-600">Response Data</h4>
+      <div className="p-2 bg-gray-100 rounded">
+        {Array.isArray(result.response_data) ? (
+          result.response_data.map((data: TestResult, index: number) => (
+            <div key={index} className="mb-4 p-4 bg-white rounded shadow-sm border">
+          <div className="mt-4 p-4 bg-blue-50 rounded shadow-inner">
+          <h5 className="font-semibold text-blue-700">Test Case Details</h5>
+          <p className="text-blue-600"><strong>Description:</strong> {data.test_case.description || 'N/A'}</p>
+          <p className="text-blue-600"><strong>Expected Status:</strong> {data.test_case.expected_status}</p>
+          <p className="text-blue-600"><strong>Test Type:</strong> {data.test_case.test_type || 'N/A'}</p>
+          </div>
+
+              <h5 className="mt-2 font-semibold text-blue-600">Response Details</h5>
+              <p><strong>Status Code:</strong> {data.status_code}</p>
+              <p><strong>Success:</strong> {data.success ? '✅' : '❌'}</p>
+
+              <h5 className="mt-2 font-semibold">Response Data</h5>
+              <pre className="whitespace-pre-wrap bg-gray-200 p-2 rounded">{JSON.stringify(data.response_data, null, 2)}</pre>
+
+            </div>
+          ))
+        ) : (
+          <pre className="whitespace-pre-wrap">{JSON.stringify(result.response_data, null, 2)}</pre>
+        )}
+      </div>
     </div>
   );
 }
