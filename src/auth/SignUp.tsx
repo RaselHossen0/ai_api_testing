@@ -52,15 +52,20 @@ export default function SignUp() {
           disabled: false
         })
       })
+      console.log('response', response)
 
       if (!response.ok) {
-        throw new Error('Failed to create account')
+        alert('Failed to create account.Duplicate email id or invalid email id')
+        return;
       }
 
       const data = await response.json()
       console.log('Account created:', data)
       alert('Account created successfully!Your account id is '+data.id)
+      // alert('Account created successfully!Your account id is '+data.id)
     } catch (error) {
+      alert('Failed to create account')
+    
       console.error('Failed to create account:', error)
       // setError(error.message)
     }

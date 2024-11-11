@@ -17,9 +17,36 @@ import Settings1 from './dashboard/settings'
 
 const Sidebar = () => {
   const location = useLocation();
-
+  const handleLogout = () => {
+    // Clear local storage
+    localStorage.clear();
+  
+    // Clear session storage
+    sessionStorage.clear();
+  
+    // Clear cookies
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+  
+    // Redirect to login page or home page
+    window.location.href = "/"; // Adjust the path as needed
+  };
   const isActive = (path: string) => location.pathname === path;
-
+    <Button
+              asChild
+              variant="ghost"
+              className={`w-full justify-start transition-colors duration-200 ${
+                isActive('/settings') ? 'bg-gray-700' : 'hover:bg-gray-700'
+              }`}
+            >
+              <Link to="/settings" className="flex items-center">
+                <List className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
+            </Button>
   return (
     <div className="pb-12 w-64 bg-gray-800 text-white h-full">
       <div className="space-y-4 py-4">
@@ -80,6 +107,19 @@ const Sidebar = () => {
               asChild
               variant="ghost"
               className={`w-full justify-start transition-colors duration-200 ${
+                isActive('/scripts') ? 'bg-gray-700' : 'hover:bg-gray-700'
+              }`}
+            >
+              <Link to="/scripts" className="flex items-center">
+                <List className="mr-2 h-4 w-4" />
+                Scripts
+              </Link>
+            </Button>
+            
+            <Button
+              asChild
+              variant="ghost"
+              className={`w-full justify-start transition-colors duration-200 ${
                 isActive('/settings') ? 'bg-gray-700' : 'hover:bg-gray-700'
               }`}
             >
@@ -88,6 +128,17 @@ const Sidebar = () => {
                 Settings
               </Link>
             </Button>
+            <Button
+  asChild
+  variant="ghost"
+  className="w-full justify-start transition-colors duration-200 hover:bg-gray-700"
+  onClick={handleLogout}
+>
+  <div className="flex items-center cursor-pointer">
+    <List className="mr-2 h-4 w-4" />
+    Logout
+  </div>
+</Button>
           </div>
         </div>
       </div>
@@ -102,6 +153,7 @@ const Sidebar = () => {
 import SignIn from './auth/SignIn'
 import SignUp from './auth/SignUp'
 import { urls } from './api/urls'
+import IntegratedTestDashboard from './dashboard/test-script'
 
 export default function App() {
   const [isAuthenticated] = useState(() => {
@@ -148,6 +200,7 @@ export default function App() {
               <Route path="/configure" element={<ConfigureTests />} />
               <Route path="/results" element={<TestResults />} />
               <Route path="/settings" element={<Settings1 />} />
+              <Route path="/scripts" element={<IntegratedTestDashboard/>} />
             </Routes>
           </ScrollArea>
         </div>
