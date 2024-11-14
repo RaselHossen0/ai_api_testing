@@ -1,5 +1,5 @@
 
-const  baseUrl = 'https://api-tau-teal.vercel.app';
+const  baseUrl = 'http://aiapi.raselhossen.tech';
 export const urls = {
     getUsers: `${baseUrl}/users`,
     baseUrl: baseUrl,
