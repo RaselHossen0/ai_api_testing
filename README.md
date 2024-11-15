@@ -1,50 +1,35 @@
-# React + TypeScript + Vite
+Automated API Testing Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web-based interface built with React.js and Node.js for API test automation, script generation, and execution.
 
-Currently, two official plugins are available:
+Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+	1.	Bulk API Upload
+	•	Upload APIs individually or via CSV/JSON files.
+	2.	Customizable Test Configuration
+	•	Configure request parameters, headers, payloads, and validation criteria.
+	3.	Automated Test Generation
+	•	Create test cases for positive, negative, boundary, and load scenarios.
+	4.	Test Script Creation
+	•	Generate scripts in Postman, JUnit, or Cypress, with options for Python, JavaScript, or Java.
+	5.	Execution & Reporting
+	•	Run tests asynchronously, monitor response metrics, and export detailed HTML/PDF/JSON reports.
+	6.	GitHub Integration
+	•	Export test cases/scripts to GitHub with CI/CD support.
+	7.	Optional Features
+	•	Schedule recurring tests and receive email notifications.
 
-## Expanding the ESLint configuration
+Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+	•	Frontend: React.js
+	•	Backend: Node.js
+	•	Testing Frameworks: Postman, JUnit, Cypress
 
-- Configure the top-level `parserOptions` property like this:
+Usage
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+	1.	Upload API request URLs.
+	2.	Customize test parameters.
+	3.	Generate and execute tests.
+	4.	View detailed reports and export results.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+This repository aims to simplify API testing and integrate seamlessly into development pipelines.
