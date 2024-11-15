@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { BarChart, Upload, Settings, List, Home } from "lucide-react"
+import { BarChart, Upload, Settings, List } from "lucide-react"
 import {  useLocation } from 'react-router-dom';
 
 
@@ -59,26 +59,25 @@ const Sidebar = () => {
               asChild
               variant="ghost"
               className={`w-full justify-start transition-colors duration-200 ${
-                isActive('/generate-test') ? 'bg-gray-700' : 'hover:bg-gray-700'
+              isActive('/generate-test') ? 'bg-gray-700' : 'hover:bg-gray-700'
               }`}
             >
               <Link to="/generate-test" className="flex items-center">
-                <Upload className="mr-2 h-4 w-4" />
-                Generate Test
+              <Upload className="mr-2 h-4 w-4" />
+              Generate Test
               </Link>
             </Button>
-           
-          
+             
             <Button
               asChild
               variant="ghost"
               className={`w-full justify-start transition-colors duration-200 ${
-                isActive('/scripts') ? 'bg-gray-700' : 'hover:bg-gray-700'
+              isActive('/scripts') ? 'bg-gray-700' : 'hover:bg-gray-700'
               }`}
             >
               <Link to="/scripts" className="flex items-center">
-                <List className="mr-2 h-4 w-4" />
-                Scripts
+              <BarChart className="mr-2 h-4 w-4" />
+              Scripts
               </Link>
             </Button>
             
@@ -86,12 +85,12 @@ const Sidebar = () => {
               asChild
               variant="ghost"
               className={`w-full justify-start transition-colors duration-200 ${
-                isActive('/settings') ? 'bg-gray-700' : 'hover:bg-gray-700'
+              isActive('/settings') ? 'bg-gray-700' : 'hover:bg-gray-700'
               }`}
             >
               <Link to="/settings" className="flex items-center">
-                <List className="mr-2 h-4 w-4" />
-                Settings
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
               </Link>
             </Button>
             <Button

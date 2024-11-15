@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Settings, Play } from "lucide-react";
+
+import {  Play } from "lucide-react";
 import { urls } from "@/api/urls";
 
 interface TestResult {
@@ -18,15 +18,24 @@ interface TestResult {
     description: string;
     expected_status: number;
     test_type: string;
+    payload?: any;
   };
   headers: Record<string, string>;
+}
+
+interface Api {
+  id: string;
+  api_name: string;
+  api_url: string;
+  http_method: string;
+  user_id: string;
 }
 
 export default function ConfigureTests() {
   const [apiName, setApiName] = useState("");
   const [apiUrl, setApiUrl] = useState("");
   const [httpMethod, setHttpMethod] = useState("GET");
-  const [useAI, setUseAI] = useState(false);
+
   const [testName, setTestName] = useState("");
   const [testDescription, setTestDescription] = useState("");
   const [testParams, setTestParams] = useState("");
@@ -35,46 +44,56 @@ export default function ConfigureTests() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<TestResult[]>([]);
-  const [responseMessage, setResponseMessage] = useState<string | null>(null);
+ 
+  const [previousApis, setPreviousApis] = useState<Api[]>([]);
+  const [selectedApiId, setSelectedApiId] = useState("");
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  useEffect(() => {
+    // Fetch previous APIs on component mount
+    const fetchPreviousApis = async () => {
+      try {
+        const response = await fetch(`${urls.baseUrl}/api_management/apis?user_id=${user.id}`, {
+          headers: { "Accept": "application/json" },
+        });
+        const apiData = await response.json();
+        setPreviousApis(apiData);
+      } catch (err) {
+        console.error("Error fetching APIs", err);
+      }
+    };
+
+    fetchPreviousApis();
+  }, [user.id]);
+
+  const handleApiSelect = (apiId: string) => {
+    const selectedApi = previousApis.find(api => api.id === apiId);
+    if (selectedApi) {
+      setApiName(selectedApi.api_name);
+      setApiUrl(selectedApi.api_url);
+      setHttpMethod(selectedApi.http_method);
+      setSelectedApiId(apiId);
+    }
+  };
 
   const handleAddAndRunTest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Upload API
     try {
-      const uploadResponse = await fetch(urls.uploadIndividualAPI, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          api_name: apiName,
-          api_url: apiUrl,
-          http_method: httpMethod,
-        }),
-      });
-
-      if (!uploadResponse.ok) {
-        setError("Failed to upload API.");
-        setLoading(false);
-        return;
-      }
-
-      const data = await uploadResponse.json();
-      setResponseMessage(data.message);
-
-      // Run test
       const payload = {
+        api_name: apiName,
         api_url: apiUrl,
         http_method: httpMethod,
         headers: JSON.parse(testHeaders || "{}"),
         parameters: JSON.parse(testParams || "{}"),
         payload: JSON.parse(testPayload || "{}"),
+        user_id: user.id,
       };
 
-      const testResponse = await fetch(urls.testapi, {
+      const testResponse = await fetch(urls.uploadIndividualAPI, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,22 +105,19 @@ export default function ConfigureTests() {
       const responseData = await testResponse.json();
       const headers = Array.from(testResponse.headers.entries()).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
-      setResults((prevResults) => [
-        ...prevResults,
-        {
+      setResults([{
+        description: testDescription,
+        expected_status: 200,
+        status_code: testResponse.status,
+        success: testResponse.status === 200,
+        response_data: responseData,
+        test_case: {
           description: testDescription,
           expected_status: 200,
-          status_code: testResponse.status,
-          success: testResponse.status === 200,
-          response_data: responseData,
-          test_case: {
-            description: testDescription,
-            expected_status: 200,
-            test_type: "Manual",
-          },
-          headers,
+          test_type: "Manual",
         },
-      ]);
+        headers,
+      }]);
     } catch (err) {
       setError("An error occurred while uploading or testing the API.");
     } finally {
@@ -118,6 +134,22 @@ export default function ConfigureTests() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAddAndRunTest} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="api-select">Select Previous API</Label>
+              <select
+                id="api-select"
+                className="w-full p-2 border rounded"
+                value={selectedApiId}
+                onChange={(e) => handleApiSelect(e.target.value)}
+              >
+                <option value="">Select an API</option>
+                {previousApis.map(api => (
+                  <option key={api.id} value={api.id}>{api.api_name}</option>
+                ))}
+              </select>
+            </div>
+
+       
             <div className="space-y-2">
               <Label htmlFor="api-name">API Name</Label>
               <Input
@@ -159,11 +191,20 @@ export default function ConfigureTests() {
             <TextareaField id="test-headers" label="Headers" value={testHeaders} setValue={setTestHeaders} placeholder="Enter request headers (JSON format)" />
             <TextareaField id="test-payload" label="Payload" value={testPayload} setValue={setTestPayload} placeholder="Enter request payload (JSON format)" />
 
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <Switch id="use-ai" checked={useAI} onCheckedChange={setUseAI} />
               <Label htmlFor="use-ai">Use AI to generate test data</Label>
-            </div>
+            </div> */}
 
+            {/* <div className="flex space-x-2">
+              <Button type="submit" variant="secondary">
+                {loading ? "Loading..." : <><Play className="mr-2 h-4 w-4" /> Add API & Run Test</>}
+              </Button>
+            </div> */}
+          {/* </form>
+          </CardContent> */}
+
+ 
             <div className="flex space-x-2">
               <Button type="submit" variant="secondary">
                 {loading ? "Loading..." : <><Play className="mr-2 h-4 w-4" /> Add API & Run Test</>}
@@ -171,7 +212,7 @@ export default function ConfigureTests() {
             </div>
           </form>
 
-          {responseMessage && <p className="text-green-500 mt-4">{responseMessage}</p>}
+          {/* Render Results */}
           {results.map((result, index) => (
             <ResultDisplay key={index} result={result} />
           ))}
@@ -203,12 +244,26 @@ function TextareaField({ id, label, value, setValue, placeholder }: { id: string
 function ResultDisplay({ result }: { result: TestResult }) {
   return (
     <div className={`p-4 mb-4 rounded ${result.success ? 'bg-green-100' : 'bg-red-100'}`}>
-      <h3 className="font-semibold text-lg">{result.description || 'Test Results'}</h3>
-      <p>Expected Status: {result.expected_status}</p>
-      <p>Actual Status: {result.status_code}</p>
-      <p>Success: {result.success ? '✅' : '❌'}</p>
-      <h4 className="mt-4 font-semibold text-blue-600">Response Data</h4>
-      <pre className="whitespace-pre-wrap bg-gray-200 p-2 rounded">{JSON.stringify(result.response_data, null, 2)}</pre>
+      <h3 className="font-semibold text-lg">{result.test_case.description || 'Test Results'}</h3>
+      <div className="space-y-1">
+        <p><strong>Expected Status:</strong> {result.test_case.expected_status}</p>
+        <p><strong>Actual Status:</strong> {result.status_code}</p>
+        <p><strong>Success:</strong> {result.success ? '✅' : '❌'}</p>
+      </div>
+      <div className="mt-4">
+        <h4 className="font-semibold text-blue-600">Test Details</h4>
+        <p><strong>Test Type:</strong> {result.test_case.test_type}</p>
+        <p><strong>Payload:</strong></p>
+        <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded">{JSON.stringify(result.test_case.payload, null, 2)}</pre>
+      </div>
+      <div className="mt-4">
+        <h4 className="font-semibold text-blue-600">Response Data</h4>
+        <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded">{JSON.stringify(result.response_data, null, 2)}</pre>
+      </div>
+      <div className="mt-4">
+        <h4 className="font-semibold text-blue-600">Headers</h4>
+        <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded">{JSON.stringify(result.headers, null, 2)}</pre>
+      </div>
     </div>
   );
 }
